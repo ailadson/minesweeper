@@ -1,4 +1,5 @@
 load "board.rb"
+require "yaml"
 
 class Minesweeper
 
@@ -27,7 +28,25 @@ class Minesweeper
       @board.toggle_flag(data)
     when "h"
       display_help
+    when "s"
+      save_game(data)
+    when "q"
+      abort("Giving up so soon?")
+    when "l"
+      @board = load_game(data)
     end
+  end
+
+  def save_game(filename)
+    Dir.mkdir("game_saves") unless File.exists?("game_saves")
+    f = filename.split(".").first + ".yaml"
+    File.write("game_saves/#{f}", @board.to_yaml)
+    abort("Game saved")
+  end
+
+  def load_game(filename)
+    f = filename.split(".").first + ".yaml"
+    YAML::load(File.read("game_saves/#{f}"))
   end
 
   def get_input
@@ -47,6 +66,8 @@ class Minesweeper
     display_command("reveal", "0,0" )
     display_command("flag", "0,0" )
     display_command("save", "\"filename\"" )
+    display_command("quit", "")
+    display_command("load", "\"filename\"")
     puts "Enter h to display this page again"
     puts "Press any key to continue"
     gets
@@ -66,3 +87,6 @@ class Minesweeper
   end
 
 end
+
+g = Minesweeper.new
+g.run
