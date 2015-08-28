@@ -36,6 +36,7 @@ class Tile
   end
 
   def reveal
+    return true if flagged?
     @revealed = true
     return false if bomb?
     if neighbor_bomb_count == 0
@@ -45,7 +46,7 @@ class Tile
   end
 
   def respond_to_neighbor_reveal
-    return if revealed?
+    return if revealed? || flagged?
     @revealed = true
     if neighbor_bomb_count.zero?
       neighbors.each { |neighbor| neighbor.respond_to_neighbor_reveal }
@@ -53,7 +54,7 @@ class Tile
   end
 
   def toggle_flag
-    @flag = !@flag
+    @flag = !@flag unless revealed?
   end
 
   def neighbor_bomb_count
@@ -64,13 +65,16 @@ class Tile
   end
 
   def to_s
-    unless revealed?
+    # print @flag
+    # print flagged?
+    #debugger
+    if flagged?
+      "|F|"
+    elsif  !revealed?
       "|*|"
     else
       if bomb?
         "|B|"
-      elsif flagged?
-        "|F|"
       elsif neighbor_bomb_count > 0
           "|#{neighbor_bomb_count}|"
       else

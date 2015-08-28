@@ -12,8 +12,19 @@ class Board
   end
 
   def reveal(position)
-    x,y = position.split(",").map(&:to_i)
+    x, y = parse_position(position)
     @grid[y][x].reveal
+  end
+
+  def toggle_flag(position)
+    x, y = parse_position(position)
+    puts "pre toggle #{@grid[y][x].flag}"
+    @grid[y][x].toggle_flag
+    puts "post toggle #{@grid[y][x].flag}"
+  end
+
+  def parse_position(position)
+    position.split(",").map(&:to_i)
   end
 
   def populate_grid

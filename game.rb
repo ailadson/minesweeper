@@ -12,6 +12,8 @@ class Minesweeper
     case command
     when "r"
       game_over unless @board.reveal(data)
+    when "f"
+      @board.toggle_flag(data)
     end
 
     @board.display
