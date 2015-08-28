@@ -18,53 +18,21 @@ class Board
 
   def toggle_flag(position)
     x, y = parse_position(position)
-    puts "pre toggle #{@grid[y][x].flag}"
     @grid[y][x].toggle_flag
-    puts "post toggle #{@grid[y][x].flag}"
-  end
-
-  def parse_position(position)
-    position.split(",").map(&:to_i)
-  end
-
-  def populate_grid
-
-    bomb_positions = generate_bomb_positions
-
-    @grid.each_with_index do |row, idx1|
-      row.each_with_index do |space, idx2|
-        pos = [idx1, idx2]
-
-        if bomb_positions.include?(pos)
-          @grid[idx1][idx2] = Tile.new(self, pos, true)
-        else
-          @grid[idx1][idx2] = Tile.new(self, pos)
-        end
-
-      end
-    end
   end
 
   def display
     system "clear"
-    x_str = ""
-    (0..size-1).to_a.each { |i| x_str += "|#{i}|"}
-    puts x_str
-    @grid.each.with_index do |row, index|
-      row_str = ""
-      row.each {|tile| row_str += tile.to_s }
-      puts row_str += " |#{index}|"
-    end
-  end
 
-  def generate_bomb_positions
-    bomb_positions = []
-    until bomb_positions.length == @number_of_bombs
-      row = rand(@size)
-      col = rand(@size)
-      bomb_positions << [row, col] unless bomb_positions.include?([row, col])
+    header = (0..size-1).to_a.inject("") do |header_str, col_idx|
+      header_str + "|#{col_idx}|"
     end
-    bomb_positions
+
+    puts header
+
+    @grid.each.with_index do |row, index|
+      puts row.join("") + " |#{index}|"
+    end
   end
 
   def []=(y, x, val)
@@ -78,8 +46,42 @@ class Board
   def valid?(y, x)
     y.between?(0,size-1) && x.between?(0,size-1)
   end
-end
 
-# b = Board.new
-# b.display
-# p b.[](0,0).neighbor_bomb_count
+  def won?
+    @grid.flatten.count { |tile| !tile.revealed? } == @number_of_bombs
+  end
+
+  def reveal_all
+    @grid.each do |row|
+      row.each do |tile|
+        tile.reveal
+      end
+    end
+  end
+
+  private
+  def generate_bomb_positions
+    bomb_positions = []
+    until bomb_positions.length == @number_of_bombs
+      row = rand(@size)
+      col = rand(@size)
+      bomb_positions << [row, col] unless bomb_positions.include?([row, col])
+    end
+    bomb_positions
+  end
+
+  def parse_position(position)
+    position.split(",").map(&:to_i)
+  end
+
+  def populate_grid
+    bomb_positions = generate_bomb_positions
+
+    @grid.each_with_index do |row, idx1|
+      row.each_with_index do |space, idx2|
+        pos = [idx1, idx2]
+        @grid[idx1][idx2] = Tile.new(self, pos, bomb_positions.include?(pos))
+      end
+    end
+  end
+end
