@@ -7,7 +7,7 @@ class Tile
     @position = position
     @board = board
     @bomb = bomb
-    @revealed = true
+    #@revealed = true
   end
 
   def bomb?
@@ -37,6 +37,19 @@ class Tile
 
   def reveal
     @revealed = true
+    return false if bomb?
+    if neighbor_bomb_count == 0
+      neighbors.each { |neighbor| neighbor.respond_to_neighbor_reveal }
+    end
+    true
+  end
+
+  def respond_to_neighbor_reveal
+    return if revealed?
+    @revealed = true
+    if neighbor_bomb_count.zero?
+      neighbors.each { |neighbor| neighbor.respond_to_neighbor_reveal }
+    end
   end
 
   def toggle_flag
@@ -44,10 +57,13 @@ class Tile
   end
 
   def neighbor_bomb_count
-    neighbors.count { |neighbor| neighbor.bomb? }
+    neighbors.count do |neighbor|
+      raise "Nil neighbor" if neighbor.nil?
+      neighbor.bomb?
+    end
   end
 
-  def inspect
+  def to_s
     unless revealed?
       "|*|"
     else
@@ -55,6 +71,8 @@ class Tile
         "|B|"
       elsif flagged?
         "|F|"
+      elsif neighbor_bomb_count > 0
+          "|#{neighbor_bomb_count}|"
       else
         "|_|"
       end

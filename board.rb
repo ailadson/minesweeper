@@ -11,6 +11,11 @@ class Board
     populate_grid
   end
 
+  def reveal(position)
+    x,y = position.split(",").map(&:to_i)
+    @grid[y][x].reveal
+  end
+
   def populate_grid
 
     bomb_positions = generate_bomb_positions
@@ -36,19 +41,19 @@ class Board
     puts x_str
     @grid.each.with_index do |row, index|
       row_str = ""
-      row.each {|tile| row_str += tile.inspect }
+      row.each {|tile| row_str += tile.to_s }
       puts row_str += " |#{index}|"
     end
   end
 
   def generate_bomb_positions
-    bomb_positions = [[0,1],[1,1],[1,0]]
-    # until bomb_positions.length == @number_of_bombs
-    #   row = rand(@size)
-    #   col = rand(@size)
-    #   bomb_positions << [row, col] unless bomb_positions.include?([row, col])
-    # end
-    # bomb_positions
+    bomb_positions = []
+    until bomb_positions.length == @number_of_bombs
+      row = rand(@size)
+      col = rand(@size)
+      bomb_positions << [row, col] unless bomb_positions.include?([row, col])
+    end
+    bomb_positions
   end
 
   def []=(y, x, val)
@@ -60,10 +65,10 @@ class Board
   end
 
   def valid?(y, x)
-    y.between?(0,size) && x.between?(0,size)
+    y.between?(0,size-1) && x.between?(0,size-1)
   end
 end
 
-b = Board.new
-b.display
-p b.[](0,0).neighbor_bomb_count
+# b = Board.new
+# b.display
+# p b.[](0,0).neighbor_bomb_count
