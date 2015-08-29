@@ -1,4 +1,5 @@
 load "tile.rb"
+require "colorize"
 require "byebug"
 
 class Board
@@ -21,7 +22,7 @@ class Board
     @grid[y][x].toggle_flag
   end
 
-  def display
+  def display(current_pos = nil)
     system "clear"
 
     header = (0..size-1).to_a.inject("") do |header_str, col_idx|
@@ -30,8 +31,24 @@ class Board
 
     puts header
 
-    @grid.each.with_index do |row, index|
-      puts row.join("") + " |#{index}|"
+    @grid.each.with_index do |row, idx1|
+      row_str = ""
+      row.each_with_index do |tile, idx2|
+
+        row_str += colorize(tile, current_pos)
+
+      end
+      puts row_str + " |#{idx1}|"
+    end
+  end
+
+  def colorize(tile, current_pos)
+    if current_pos
+      if tile.at_position?(current_pos)
+        tile.to_s.colorize(:background => :light_black, :color => :black)
+      else
+        tile.to_s
+      end
     end
   end
 

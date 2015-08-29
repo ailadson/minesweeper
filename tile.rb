@@ -49,6 +49,10 @@ class Tile
     end
   end
 
+  def at_position?(pos)
+    pos == position
+  end
+
   private
   attr_reader :position, :bomb, :flag, :revealed
 

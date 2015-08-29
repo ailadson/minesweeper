@@ -5,6 +5,7 @@ class Minesweeper
 
   def initialize
     @board = Board.new
+    @current_pos = [0,0]
   end
 
   def run
@@ -17,7 +18,7 @@ class Minesweeper
   end
 
   def play_turn
-    @board.display
+    @board.display(@current_pos)
 
     command, data = get_input
 
