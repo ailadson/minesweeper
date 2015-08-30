@@ -1,5 +1,3 @@
-require "byebug"
-
 class Tile
   def initialize( board, position, bomb=false)
     @position = position

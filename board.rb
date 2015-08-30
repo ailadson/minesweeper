@@ -1,6 +1,5 @@
 load "tile.rb"
 require "colorize"
-require "byebug"
 
 class Board
   attr_reader :size
@@ -13,12 +12,12 @@ class Board
   end
 
   def reveal(position)
-    x, y = parse_position(position)
+    y, x = position
     @grid[y][x].reveal
   end
 
   def toggle_flag(position)
-    x, y = parse_position(position)
+    y, x = position
     @grid[y][x].toggle_flag
   end
 
@@ -28,27 +27,14 @@ class Board
     header = (0..size-1).to_a.inject("") do |header_str, col_idx|
       header_str + "|#{col_idx}|"
     end
-
     puts header
 
     @grid.each.with_index do |row, idx1|
       row_str = ""
       row.each_with_index do |tile, idx2|
-
         row_str += colorize(tile, current_pos)
-
       end
       puts row_str + " |#{idx1}|"
-    end
-  end
-
-  def colorize(tile, current_pos)
-    if current_pos
-      if tile.at_position?(current_pos)
-        tile.to_s.colorize(:background => :light_black, :color => :black)
-      else
-        tile.to_s
-      end
     end
   end
 
@@ -87,8 +73,26 @@ class Board
     bomb_positions
   end
 
-  def parse_position(position)
-    position.split(",").map(&:to_i)
+  def colorize(tile, current_pos)
+    if current_pos
+      if tile.at_position?(current_pos)
+        tile.to_s.colorize(:background => :light_black, :color => :black)
+      elsif tile.revealed?
+
+        if tile.bomb?
+          tile.to_s.colorize(:background => :red, :color => :black)
+        elsif !(tile.to_s == "|_|") # a number
+          tile.to_s.colorize(:background => :light_magenta, :color => :black)
+        else
+          tile.to_s
+        end
+
+      elsif tile.flagged?
+        tile.to_s.colorize(:color => :yellow)
+      else
+        tile.to_s
+      end
+    end
   end
 
   def populate_grid

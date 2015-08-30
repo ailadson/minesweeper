@@ -1,5 +1,6 @@
 load "board.rb"
 require "yaml"
+require 'io/console'
 
 class Minesweeper
 
@@ -19,23 +20,23 @@ class Minesweeper
 
   def play_turn
     @board.display(@current_pos)
-
-    command, data = get_input
-
-    case command.downcase
-    when "r"
-      game_over unless @board.reveal(data)
-    when "f"
-      @board.toggle_flag(data)
-    when "h"
-      display_help
-    when "s"
-      save_game(data)
-    when "q"
-      abort("Giving up so soon?")
-    when "l"
-      @board = load_game(data)
-    end
+    handle_key_press while true
+    # command, data = get_input
+    #
+    # case command.downcase
+    # when "r"
+    #   game_over unless @board.reveal(data)
+    # when "f"
+    #   @board.toggle_flag(data)
+    # when "h"
+    #   display_help
+    # when "s"
+    #   save_game(data)
+    # when "q"
+    #   abort("Giving up so soon?")
+    # when "l"
+    #   @board = load_game(data)
+    # end
   end
 
   def save_game(filename)
@@ -57,20 +58,22 @@ class Minesweeper
 
   def game_over
     @board.reveal_all
-    @board.display
+    @board.display(@current_pos)
     abort("Game Over")
   end
 
   def display_help
     system "clear"
     puts "THE COMMANDS"
-    display_command("reveal", "0,0" )
-    display_command("flag", "0,0" )
-    display_command("save", "\"filename\"" )
-    display_command("quit", "")
-    display_command("load", "\"filename\"")
-    puts "Enter h to display this page again"
-    puts "Press any key to continue"
+    puts "Use the arrow keys to navigate."
+    puts "Press ENTER to reveal space."
+    puts "Press F to flag space."
+    puts "Press S to save the game."
+    puts "Press L to load game."
+    puts "Press Q to quit game."
+    puts ""
+    puts "Press H to display this page again"
+    puts "Press ENTER key to continue"
     gets
   end
 
@@ -86,6 +89,72 @@ class Minesweeper
     command = gets.chomp.downcase
     display_help if command == "h"
   end
+
+  def handle_key_press
+
+    c = read_char
+    case c
+    when "\e[A"
+      y, x = @current_pos
+      @current_pos = [y-1,x] if @board.valid?(y-1, x)
+      @board.display(@current_pos)
+    when "\e[B"
+      y, x = @current_pos
+      @current_pos = [y+1,x] if @board.valid?(y+1, x)
+      @board.display(@current_pos)
+    when "\e[C"
+      y, x = @current_pos
+      @current_pos = [y,x+1] if @board.valid?(y, x+1)
+      @board.display(@current_pos)
+    when "\e[D"
+      y, x = @current_pos
+      @current_pos = [y,x-1] if @board.valid?(y, x-1)
+      @board.display(@current_pos)
+    when "\r"
+      game_over unless @board.reveal(@current_pos)
+      @board.display(@current_pos)
+    when " "
+      game_over unless @board.reveal(@current_pos)
+      @board.display(@current_pos)
+    when "f"
+      @board.toggle_flag(@current_pos)
+      @board.display(@current_pos)
+    when "s"
+      puts "Choose a file name."
+      save_game(gets.chomp)
+    when "l"
+      puts "What is the file name?"
+      @board = load_game(gets.chomp)
+      @board.display(@current_pos)
+    when "h"
+      display_help
+      @board.display(@current_pos)
+    when "q"
+      abort("Giving up so soon?")
+    when "\u0003"
+      exit 0
+    # when /^.$/
+    #   puts "SINGLE CHAR HIT: #{c.inspect}"
+    else
+      puts "SOMETHING ELSE: #{c.inspect}"
+    end
+  end
+
+  def read_char
+  STDIN.echo = false
+  STDIN.raw!
+
+  input = STDIN.getc.chr
+  if input == "\e" then
+    input << STDIN.read_nonblock(3) rescue nil
+    input << STDIN.read_nonblock(2) rescue nil
+  end
+ensure
+  STDIN.echo = true
+  STDIN.cooked!
+
+  return input
+end
 
 end
 
