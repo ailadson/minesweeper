@@ -21,22 +21,6 @@ class Minesweeper
   def play_turn
     @board.display(@current_pos)
     handle_key_press while true
-    # command, data = get_input
-    #
-    # case command.downcase
-    # when "r"
-    #   game_over unless @board.reveal(data)
-    # when "f"
-    #   @board.toggle_flag(data)
-    # when "h"
-    #   display_help
-    # when "s"
-    #   save_game(data)
-    # when "q"
-    #   abort("Giving up so soon?")
-    # when "l"
-    #   @board = load_game(data)
-    # end
   end
 
   def save_game(filename)
